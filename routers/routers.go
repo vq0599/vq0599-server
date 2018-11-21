@@ -1,21 +1,16 @@
 package routers
 
 import (
-    "net/http"
     "github.com/gin-gonic/gin"
+    "vq0599/controller"
 )
 
 func InitRouter() *gin.Engine {
     router := gin.Default()
+    apiv1 := router.Group("/api/v1")
 
-    router.GET("api/v1/user/:id", func(c *gin.Context) {
-        id := c.Params.ByName("id")
-        c.JSON(http.StatusOK, gin.H{
-            "id": id,
-            "name": "黄努努",
-            "age": 25,
-        })
-    })
+    apiv1.GET("/articles", controller.GetArticle)
+    apiv1.POST("/articles/add", controller.AddArticle)
 
     return router
 }

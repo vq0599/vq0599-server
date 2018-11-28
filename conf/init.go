@@ -7,5 +7,5 @@ const (
   DB_PASSWORD   = "ceoms999"
   DB_NAME       = "test"
 
-  SERVER_PORT   = "8081"
+  SERVER_PORT   = "8180"
 )

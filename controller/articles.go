@@ -3,75 +3,85 @@ package controller
 import (
     "net/http"
     "github.com/gin-gonic/gin"
-    "fmt"
+    // "fmt"
     "strconv"
     _"github.com/go-sql-driver/mysql"
-    "vq0599/pkg/response"
     "vq0599/models"
+    "vq0599/common"
 )
 
 
 func GetArticles (c *gin.Context) {
-  rG := r.Gin{C: c}
+  cG := common.Gin{C: c}
   results, err := models.GetArticles()
   if (err != nil) {
-    rG.Response(http.StatusOK, r.ERROR_NOT_EXIST_ARTICLE, nil)
+    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
   } else {
-    rG.Response(http.StatusOK, r.SUCCESS, results)
+    cG.Response(http.StatusOK, common.SUCCESS, results)
   }
 }
 
 func GetArticle (c *gin.Context) {
-  rG := r.Gin{C: c}
+  cG := common.Gin{C: c}
   idString := c.Param("id")
   id, err := strconv.Atoi(idString)
 
   if (err != nil) {
-    rG.Response(http.StatusBadRequest, r.INVALID_PARAMS, nil)
+    cG.Response(http.StatusBadRequest, common.INVALID_PARAMS, nil)
     return
   }
 
   result, err := models.GetArticle(id)
 
   if (err != nil) {
-    fmt.Println(err)
-    rG.Response(http.StatusOK, r.ERROR_NOT_EXIST_ARTICLE, nil)
-    } else {
-    rG.Response(http.StatusOK, r.SUCCESS, result)
+    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
+  } else {
+    cG.Response(http.StatusOK, common.SUCCESS, result)
   }
 }
 
 func AddArticle (c *gin.Context) {
+  type Params struct {
+    Title string `json:"title" binding:"required"`
+    Content string `json:"content" binding:"required"`
+  }
 
+  cG := common.Gin{C: c}
+  params := &Params{}
+
+  paramsErr := cG.Request(params)
+
+  if (paramsErr == nil) {
+    cG.Response(http.StatusOK, common.SUCCESS, params)
+  }
 }
 
 
 func Count (c *gin.Context) {
   type Params struct {
-    Id int `json:"id"`
+    Id int `json:"id" binding:"required"`
   }
-  data := &Params{}
-  paramsErr := c.ShouldBindJSON(data)
+  params := &Params{}
+  cG := common.Gin{C: c}
 
-  rG := r.Gin{C: c}
+  paramsErr := cG.Request(params)
 
-  if (paramsErr != nil) {
-    rG.Response(http.StatusBadRequest, r.INVALID_PARAMS, nil)
+  if paramsErr != nil {
     return
   }
 
-  isExist := models.CheckArticleExist(data.Id)
+  isExist := models.CheckArticleExist(params.Id)
 
   if isExist == false {
-    rG.Response(http.StatusOK, r.ERROR_NOT_EXIST_ARTICLE, nil)
+    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
     return
   }
 
-  resultErr := models.Count(data.Id)
+  resultErr := models.Count(params.Id)
 
   if resultErr != nil {
-    rG.Response(http.StatusOK, r.ERROR, nil)
+    cG.Response(http.StatusOK, common.ERROR, nil)
   } else {
-    rG.Response(http.StatusOK, r.SUCCESS, nil)
+    cG.Response(http.StatusOK, common.SUCCESS, nil)
   }
 }

@@ -3,7 +3,8 @@ package controller
 import (
     "net/http"
     "github.com/gin-gonic/gin"
-    // "fmt"
+    "fmt"
+    "strconv"
     _"github.com/go-sql-driver/mysql"
     "vq0599/pkg/response"
     "vq0599/models"
@@ -12,12 +13,32 @@ import (
 
 func GetArticles (c *gin.Context) {
   rG := r.Gin{C: c}
-  results := models.GetArticles()
-  rG.Response(http.StatusOK, r.SUCCESS, results)
+  results, err := models.GetArticles()
+  if (err != nil) {
+    rG.Response(http.StatusOK, r.ERROR_NOT_EXIST_ARTICLE, nil)
+  } else {
+    rG.Response(http.StatusOK, r.SUCCESS, results)
+  }
 }
 
 func GetArticle (c *gin.Context) {
+  rG := r.Gin{C: c}
+  idString := c.Param("id")
+  id, err := strconv.Atoi(idString)
 
+  if (err != nil) {
+    rG.Response(http.StatusBadRequest, r.INVALID_PARAMS, nil)
+    return
+  }
+
+  result, err := models.GetArticle(id)
+
+  if (err != nil) {
+    fmt.Println(err)
+    rG.Response(http.StatusOK, r.ERROR_NOT_EXIST_ARTICLE, nil)
+    } else {
+    rG.Response(http.StatusOK, r.SUCCESS, result)
+  }
 }
 
 func AddArticle (c *gin.Context) {

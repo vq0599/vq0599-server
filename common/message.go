@@ -1,4 +1,4 @@
-package r
+package common
 
 var msgFlags = map[int]string{
   SUCCESS:                         "SUCCESS",

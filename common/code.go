@@ -1,4 +1,4 @@
-package r
+package common
 
 const (
   SUCCESS        = 200

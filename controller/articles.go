@@ -51,8 +51,16 @@ func AddArticle (c *gin.Context) {
 
   paramsErr := cG.Request(params)
 
-  if (paramsErr == nil) {
-    cG.Response(http.StatusOK, common.SUCCESS, params)
+  if paramsErr != nil {
+    return
+  }
+
+  id, err := models.AddArticle(params.Title, params.Content)
+
+  if err != nil {
+    cG.Response(http.StatusOK, common.ERROR_ADD_ARTICLE_FAIL, nil)
+    } else {
+    cG.Response(http.StatusOK, common.SUCCESS, id)
   }
 }
 

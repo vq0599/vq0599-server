@@ -2,7 +2,7 @@ package models
 
 import (
   "time"
-  // "fmt"
+  "html"
 )
 
 type Article struct {
@@ -28,7 +28,9 @@ func GetArticles() ([]Article, error) {
     var create_time time.Time
     rows.Scan(&article.Id, &article.Title, &article.Content, &create_time, &article.Pv)
     
-    article.Create_time = create_time.UnixNano()/1e6
+    article.Content = html.UnescapeString(article.Content)
+    article.Create_time = create_time.UnixNano() / 1e6
+
     results = append(results, article)
   }
 
@@ -52,6 +54,7 @@ func GetArticle(id int) (Article, error) {
   )
 
   article.Create_time = create_time.UnixNano() / 1e6
+  article.Content = html.UnescapeString(article.Content)
 
   return article, err
 }
@@ -78,4 +81,26 @@ func Count(id int) error {
 
   _, err := db.Exec("update articles set pv = pv + 1 where id = ?", id)
   return err
+}
+
+// 添加文章
+func AddArticle(title string, content string) (int64, error) {
+  db, _ := Open()
+  defer db.Close()
+
+  stmt, preErr := db.Prepare("insert articles set title=?, content=?")
+
+  if preErr != nil {
+    return 0, preErr
+  }
+
+
+  res, _ := stmt.Exec(title, html.EscapeString(content))
+  id, insetErr := res.LastInsertId()
+
+  if insetErr != nil {
+    return 0, nil
+  } else {
+    return id, insetErr
+  }
 }

@@ -21,7 +21,7 @@ func GetArticles() ([]Article, error) {
   db, _ := Open()
   defer db.Close()
   
-  rows, err := db.Query("select * from articles")
+  rows, err := db.Query("SELECT * from ARTICLES")
   defer rows.Close()
 
   for rows.Next() {
@@ -46,7 +46,7 @@ func GetArticle(id int) (Article, error) {
   db, _ := Open()
   defer db.Close()
 
-  err := db.QueryRow("select * from articles where id = ?", id).Scan(
+  err := db.QueryRow("SELECT * FROM articles WHERE id = ?", id).Scan(
     &article.Id,
     &article.Title,
     &article.Content,
@@ -66,7 +66,7 @@ func CheckArticleExist(id int) bool {
   db, _ := Open()
   defer db.Close()
 
-  err := db.QueryRow("select id from articles where id = ?", id).Scan(&flag)
+  err := db.QueryRow("SELECT id FROM articles WHERE id = ?", id).Scan(&flag)
 
   if err != nil {
     return false
@@ -76,11 +76,12 @@ func CheckArticleExist(id int) bool {
 }
 
 // 添加文章的pv
-func Count(id int) error {
+func (params *Article) UpdateArticle() error {
   db, _ := Open()
   defer db.Close()
 
-  _, err := db.Exec("update articles set pv = pv + 1 where id = ?", id)
+  stmt, _ := db.Prepare("UPDATE articles SET title = ?, content = ? WHERE id = ?")
+  _, err := stmt.Exec(params.Title, params.Content, params.Id)
   return err
 }
 
@@ -89,7 +90,7 @@ func AddArticle(title string, content string) (int64, error) {
   db, _ := Open()
   defer db.Close()
 
-  stmt, preErr := db.Prepare("insert articles set title=?, content=?")
+  stmt, preErr := db.Prepare("INSERT articles SET title=?, content=?")
 
   if preErr != nil {
     return 0, preErr

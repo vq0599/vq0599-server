@@ -11,7 +11,7 @@ import (
 )
 
 
-func GetArticles (c *gin.Context) {
+func GetArticles(c *gin.Context) {
   cG := common.Gin{C: c}
   results, err := models.GetArticles()
   if (err != nil) {
@@ -21,7 +21,7 @@ func GetArticles (c *gin.Context) {
   }
 }
 
-func GetArticle (c *gin.Context) {
+func GetArticle(c *gin.Context) {
   cG := common.Gin{C: c}
   idString := c.Param("id")
   id, err := strconv.Atoi(idString)
@@ -40,7 +40,7 @@ func GetArticle (c *gin.Context) {
   }
 }
 
-func AddArticle (c *gin.Context) {
+func AddArticle(c *gin.Context) {
   type Params struct {
     Title string `json:"title" binding:"required"`
     Content string `json:"content" binding:"required"`
@@ -90,11 +90,13 @@ func DeleteArticle(c *gin.Context) {
   }
 }
 
-
-func Count (c *gin.Context) {
+func UpdateArticle(c *gin.Context) {
   type Params struct {
     Id int `json:"id" binding:"required"`
+    Title string `json:"title"`
+    Content string `json:"content"`
   }
+
   params := &Params{}
   cG := common.Gin{C: c}
 
@@ -104,6 +106,12 @@ func Count (c *gin.Context) {
     return
   }
 
+  articleModels := models.Article{
+    Id:     params.Id,
+    Title:     params.Title,
+    Content:     params.Content,
+  }
+
   isExist := models.CheckArticleExist(params.Id)
 
   if isExist == false {
@@ -111,7 +119,7 @@ func Count (c *gin.Context) {
     return
   }
 
-  resultErr := models.Count(params.Id)
+  resultErr := articleModels.UpdateArticle()
 
   if resultErr != nil {
     cG.Response(http.StatusOK, common.ERROR, nil)

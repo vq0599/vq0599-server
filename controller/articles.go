@@ -64,6 +64,32 @@ func AddArticle (c *gin.Context) {
   }
 }
 
+func DeleteArticle(c *gin.Context) {
+  cG := common.Gin{C: c}
+  idString := c.Param("id")
+  id, err := strconv.Atoi(idString)
+
+  if (err != nil) {
+    cG.Response(http.StatusBadRequest, common.INVALID_PARAMS, nil)
+    return
+  }
+
+  isExist := models.CheckArticleExist(id)
+
+  if isExist == false {
+    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
+    return
+  }
+
+  resultErr := models.DeleteArticle(id)
+
+  if resultErr != nil {
+    cG.Response(http.StatusOK, common.ERROR, nil)
+  } else {
+    cG.Response(http.StatusOK, common.SUCCESS, nil)
+  }
+}
+
 
 func Count (c *gin.Context) {
   type Params struct {

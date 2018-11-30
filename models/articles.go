@@ -3,6 +3,7 @@ package models
 import (
   "time"
   "html"
+  // "fmt"
 )
 
 type Article struct {
@@ -103,4 +104,15 @@ func AddArticle(title string, content string) (int64, error) {
   } else {
     return id, insetErr
   }
+}
+
+// 删除文章
+func DeleteArticle(id int) error {
+  db, _ := Open()
+  defer db.Close()
+
+  stmt, _ := db.Prepare("DELETE FROM articles WHERE id=?")
+  _, err := stmt.Exec(id)
+
+  return err
 }

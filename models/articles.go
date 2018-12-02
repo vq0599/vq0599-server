@@ -21,7 +21,7 @@ func GetArticles() ([]Article, error) {
   db, _ := Open()
   defer db.Close()
   
-  rows, err := db.Query("SELECT * from ARTICLES")
+  rows, err := db.Query("SELECT * FROM articles")
   defer rows.Close()
 
   for rows.Next() {

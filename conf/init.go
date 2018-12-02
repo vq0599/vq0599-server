@@ -5,7 +5,7 @@ const (
   DB_USER       = "root"
   DB_TYPE       = "mysql"
   DB_PASSWORD   = "ceoms999"
-  DB_NAME       = "test"
+  DB_NAME       = "blog"
 
   SERVER_PORT   = "8180"
 )

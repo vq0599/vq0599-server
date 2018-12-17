@@ -16,5 +16,6 @@ func InitRouter() *gin.Engine {
   apiv1.PATCH("/articles/:id", controller.UpdateArticle)
 
   apiv1.POST("/login", controller.Login)
+  apiv1.GET("/login", controller.GetLoginStatus)
   return router
 }

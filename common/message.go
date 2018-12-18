@@ -7,10 +7,10 @@ var msgFlags = map[int]string{
   ERROR_NOT_EXIST_ARTICLE:         "该文章不存在",
   ERROR_ADD_ARTICLE_FAIL:          "添加文章失败",
   ERROR_NOT_EXIST_USER:            "用户不存在",
-  ERROR_LOGIN_PASSWORD:            "密码错误",
-  NOT_LOGGED:                      "未登录",
+  ERROR_PASSWORD_FAIL:             "密码错误",
+  ERROR_NOT_LOGGED:                "未登录",
+  ERROR_AUTHENTICATION_FAIL:       "鉴权失败",
 }
-
 
 func GetMsg(code int) string {
   msg, ok := msgFlags[code]

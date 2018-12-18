@@ -8,12 +8,12 @@ const (
   DB_HOST         = "127.0.0.1:3306"
   DB_USER         = "root"
   DB_TYPE         = "mysql"
-  DB_PASSWORD     = ""
+  DB_PASSWORD     = "ceoms999"
   DB_NAME         = "blog"
 
   SERVER_PORT     = "8180"
 
-  JWT_SECRET      = ""
+  JWT_SECRET      = "golang"
   // 24 小时有效期
   JWT_MAXAGE      = 24 * time.Hour
   // 1小时刷新TOKEN

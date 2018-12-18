@@ -24,7 +24,7 @@ func setCookie(c *gin.Context, name, value string) {
   })
 }
 
-// 验证TOKEN是否合法
+// 验证TOKEN是否合法(JWT验证 + 数据库验证)
 func verifyToken(token string) bool {
   claims, TokenErr := util.ParseToken(token)
 
@@ -42,8 +42,8 @@ func verifyToken(token string) bool {
   return models.VerifyToken(id, token)
 }
 
-// 验证TOKEN剩余有效期，并判断是否刷新
-func verifyTokenRefresh(token string) (bool, string) {
+// 判断TOKEN是否需要刷新并自动更新TOKEN
+func refreshToken(token string) (bool, string) {
   // 剩余有效时间
   claims, _ := util.ParseToken(token)
   id, _ := strconv.Atoi(claims.Id)
@@ -53,6 +53,25 @@ func verifyTokenRefresh(token string) (bool, string) {
   if validTime < int64((conf.JWT_MAXAGE - conf.JWT_REFRESH) / time.Second) {
     newToken, _ := util.GenerateToken(id)
     models.UpdateToken(newToken, id)
+    return true, newToken
+  }
+
+  return false, ""
+}
+
+// 任何更新资源的操作之前，完整的走一遍Token流程
+func VerifyTokenWithRefresh(c *gin.Context) (bool, string) {
+  cookie, cookieErr := c.Request.Cookie("Token")
+
+  if cookieErr != nil {
+    return false, ""
+  }
+
+  token := cookie.Value
+  isValidToken := verifyToken(token)
+
+  if isValidToken == true {
+    _, newToken := refreshToken(token)
     return true, newToken
   }
 
@@ -90,27 +109,20 @@ func Login(c *gin.Context) {
     setCookie(c, "Token", token)
     cG.Response(http.StatusOK, common.SUCCESS, nil)
   } else {
-    cG.Response(http.StatusOK, common.ERROR_LOGIN_PASSWORD, nil)
+    cG.Response(http.StatusOK, common.ERROR_PASSWORD_FAIL, nil)
   }
 }
 
-// 获取登录状态
 func GetLoginStatus(c *gin.Context) {
   cG := common.Gin{C: c}
-  cookie, _ := c.Request.Cookie("Token")
-  token := cookie.Value
+  isValid, token := VerifyTokenWithRefresh(c)
 
-  isValidToken := verifyToken(token)
-
-  if isValidToken == true {
-    isRefresh, newToken := verifyTokenRefresh(token)
-    if (isRefresh) {
-      setCookie(c, "Token", newToken)
-      cG.Response(http.StatusOK, common.SUCCESS, newToken)
-      return
+  if isValid == true {
+    if token != "" {
+      setCookie(c, "Token", token)
     }
     cG.Response(http.StatusOK, common.SUCCESS, nil)
   } else {
-    cG.Response(http.StatusOK, common.NOT_LOGGED, nil)
+    cG.Response(http.StatusOK, common.ERROR_NOT_LOGGED, nil)
   }
 }

@@ -96,14 +96,17 @@ func AddArticle(title string, content string) (int64, error) {
     return 0, preErr
   }
 
+  res, execErr := stmt.Exec(title, html.EscapeString(content))
+  if execErr != nil {
+    return 0, execErr
+  }
 
-  res, _ := stmt.Exec(title, html.EscapeString(content))
   id, insetErr := res.LastInsertId()
 
   if insetErr != nil {
-    return 0, nil
+    return id, nil
   } else {
-    return id, insetErr
+    return 0, insetErr
   }
 }
 

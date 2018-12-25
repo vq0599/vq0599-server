@@ -4,7 +4,6 @@ import (
     "net/http"
     "github.com/gin-gonic/gin"
     // "fmt"
-    "strconv"
     _"github.com/go-sql-driver/mysql"
     "vq0599/models"
     "vq0599/common"
@@ -23,11 +22,9 @@ func GetArticles(c *gin.Context) {
 
 func GetArticle(c *gin.Context) {
   cG := common.Gin{C: c}
-  idString := c.Param("id")
-  id, err := strconv.Atoi(idString)
+  id, idErr := cG.GetParamFromURI("id")
 
-  if (err != nil) {
-    cG.Response(http.StatusBadRequest, common.INVALID_PARAMS, nil)
+  if idErr != nil {
     return
   }
 
@@ -66,11 +63,9 @@ func AddArticle(c *gin.Context) {
 
 func DeleteArticle(c *gin.Context) {
   cG := common.Gin{C: c}
-  idString := c.Param("id")
-  id, err := strconv.Atoi(idString)
+  id, idErr := cG.GetParamFromURI("id")
 
-  if (err != nil) {
-    cG.Response(http.StatusBadRequest, common.INVALID_PARAMS, nil)
+  if idErr != nil {
     return
   }
 
@@ -91,28 +86,31 @@ func DeleteArticle(c *gin.Context) {
 }
 
 func UpdateArticle(c *gin.Context) {
+  cG := common.Gin{C: c}
+  id, idErr := cG.GetParamFromURI("id")
+
+  if idErr != nil {
+    return
+  }
+
   type Params struct {
-    Id int `json:"id" binding:"required"`
-    Title string `json:"title"`
-    Content string `json:"content"`
+    Title string `json:"title" binding:"required"`
+    Content string `json:"content" binding:"required"`
   }
 
   params := &Params{}
-  cG := common.Gin{C: c}
-
   paramsErr := cG.Request(params)
-
   if paramsErr != nil {
     return
   }
 
   articleModels := models.Article{
-    Id:     params.Id,
-    Title:     params.Title,
-    Content:     params.Content,
+    Id:       id,
+    Title:    params.Title,
+    Content:   params.Content,
   }
 
-  isExist := models.CheckArticleExist(params.Id)
+  isExist := models.CheckArticleExist(id)
 
   if isExist == false {
     cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)

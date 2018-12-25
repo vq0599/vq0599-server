@@ -46,7 +46,7 @@ func AddArticle(c *gin.Context) {
   cG := common.Gin{C: c}
   params := &Params{}
 
-  paramsErr := cG.Request(params)
+  paramsErr := cG.ScanRequestBody(params)
 
   if paramsErr != nil {
     return
@@ -99,7 +99,7 @@ func UpdateArticle(c *gin.Context) {
   }
 
   params := &Params{}
-  paramsErr := cG.Request(params)
+  paramsErr := cG.ScanRequestBody(params)
   if paramsErr != nil {
     return
   }

@@ -6,7 +6,7 @@ import (
   "strconv"
 )
 
-func (g *Gin) Request(params interface{}) error {
+func (g *Gin) ScanRequestBody(params interface{}) error {
   paramsErr := g.C.ShouldBindJSON(params)
 
   if (paramsErr != nil) {

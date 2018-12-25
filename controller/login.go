@@ -88,7 +88,7 @@ func Login(c *gin.Context) {
   cG := common.Gin{C: c}
   params := &Params{}
 
-  paramsErr := cG.Request(params)
+  paramsErr := cG.ScanRequestBody(params)
 
   if paramsErr != nil {
     return

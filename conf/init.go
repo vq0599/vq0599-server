@@ -21,4 +21,6 @@ const (
 
   COOKIES_DOMAIN  = "vq0599.xyz"
   COOKIES_MAXAGE  = 7 * 24 * 3600
+
+  STATIC_DOMAIN   = "http://static.vq0599.xyz"
 )

@@ -21,6 +21,8 @@ func InitRouter() *gin.Engine {
     apiv1.POST("/articles", controller.AddArticle)
     apiv1.DELETE("/articles/:id",  controller.DeleteArticle)
     apiv1.PATCH("/articles/:id", controller.UpdateArticle)
+    apiv1.POST("/upload/images", controller.UploadImage)
+    apiv1.POST("/upload/videos", controller.UploadVideo)
   }
 
   return router

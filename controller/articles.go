@@ -7,7 +7,14 @@ import (
     _"github.com/go-sql-driver/mysql"
     "vq0599/models"
     "vq0599/common"
+    "strings"
 )
+
+type ArticleParams struct {
+  Title string `json:"title" binding:"required"`
+  Content string `json:"content" binding:"required"`
+  Tags []string `json:"tags" binding:"required"`
+}
 
 
 func GetArticles(c *gin.Context) {
@@ -38,21 +45,15 @@ func GetArticle(c *gin.Context) {
 }
 
 func AddArticle(c *gin.Context) {
-  type Params struct {
-    Title string `json:"title" binding:"required"`
-    Content string `json:"content" binding:"required"`
-  }
-
   cG := common.Gin{C: c}
-  params := &Params{}
+  params := &ArticleParams{}
 
-  paramsErr := cG.ScanRequestBody(params)
-
-  if paramsErr != nil {
+  if cG.ScanRequestBody(params) != nil {
     return
   }
 
-  id, err := models.AddArticle(params.Title, params.Content)
+  tagsString := strings.Join(params.Tags, ",")
+  id, err := models.AddArticle(params.Title, params.Content, tagsString)
 
   if err != nil {
     cG.Response(http.StatusOK, common.ERROR_ADD_ARTICLE_FAIL, nil)
@@ -93,21 +94,10 @@ func UpdateArticle(c *gin.Context) {
     return
   }
 
-  type Params struct {
-    Title string `json:"title" binding:"required"`
-    Content string `json:"content" binding:"required"`
-  }
-
-  params := &Params{}
+  params := &ArticleParams{}
   paramsErr := cG.ScanRequestBody(params)
   if paramsErr != nil {
     return
-  }
-
-  articleModels := models.Article{
-    Id:       id,
-    Title:    params.Title,
-    Content:   params.Content,
   }
 
   isExist := models.CheckArticleExist(id)
@@ -117,7 +107,13 @@ func UpdateArticle(c *gin.Context) {
     return
   }
 
-  resultErr := articleModels.UpdateArticle()
+  tagsString := strings.Join(params.Tags, ",")
+  resultErr := models.UpdateArticle(
+    id,
+    params.Title,
+    params.Content,
+    tagsString,
+  )
 
   if resultErr != nil {
     cG.Response(http.StatusOK, common.ERROR, nil)

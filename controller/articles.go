@@ -12,8 +12,9 @@ import (
 
 type ArticleParams struct {
   Title string `json:"title" binding:"required"`
-  Content string `json:"content" binding:"required"`
+  Source string `json:"source" binding:"required"`
   Tags []string `json:"tags" binding:"required"`
+  Html string `json:"html" binding:"required"`
 }
 
 
@@ -53,7 +54,7 @@ func AddArticle(c *gin.Context) {
   }
 
   tagsString := strings.Join(params.Tags, ",")
-  id, err := models.AddArticle(params.Title, params.Content, tagsString)
+  id, err := models.AddArticle(params.Title, params.Source, params.Html, tagsString)
 
   if err != nil {
     cG.Response(http.StatusOK, common.ERROR_ADD_ARTICLE_FAIL, nil)
@@ -111,8 +112,9 @@ func UpdateArticle(c *gin.Context) {
   resultErr := models.UpdateArticle(
     id,
     params.Title,
-    params.Content,
+    params.Source,
     tagsString,
+    params.Html,
   )
 
   if resultErr != nil {

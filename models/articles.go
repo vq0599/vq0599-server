@@ -2,7 +2,6 @@ package models
 
 import (
   "time"
-  "html"
   "vq0599/common"
   // "fmt"
 )
@@ -10,10 +9,11 @@ import (
 type Article struct {
   Id            int      `json:"id"`
   Title         string   `json:"title"`
-  Content       string   `json:"content"`
+  Source       string   ` json:"source"`
   Create_time   int64    `json:"create_time"`
   Pv            int      `json:"pv"`
   Tags          []string `json:"tags"`
+  Html          string   `json:"html"`
 }
 
 // 获取文章列表
@@ -30,10 +30,9 @@ func GetArticles() ([]Article, error) {
   for rows.Next() {
     var article Article
     var create_time time.Time
-    rows.Scan(&article.Id, &article.Title, &article.Content, &create_time, &article.Pv, &tags)
+    rows.Scan(&article.Id, &article.Title, &article.Source, &create_time, &article.Pv, &tags, &article.Html)
     
     article.Tags = common.Split(tags, ",")
-    article.Content = html.UnescapeString(article.Content)
     article.Create_time = create_time.UnixNano() / 1e6
 
     results = append(results, article)
@@ -54,15 +53,15 @@ func GetArticle(id int) (Article, error) {
   err := db.QueryRow("SELECT * FROM articles WHERE id = ?", id).Scan(
     &article.Id,
     &article.Title,
-    &article.Content,
+    &article.Source,
     &create_time,
     &article.Pv,
     &tags,
+    &article.Html,
   )
 
   article.Tags = common.Split(tags, ",")
   article.Create_time = create_time.UnixNano() / 1e6
-  article.Content = html.UnescapeString(article.Content)
 
   return article, err
 }
@@ -83,27 +82,33 @@ func CheckArticleExist(id int) bool {
 }
 
 // 编辑文章
-func UpdateArticle(id int, title, content, tags string) error {
+func UpdateArticle(id int, title, source, tags, html string) error {
   db, _ := Open()
   defer db.Close()
 
-  stmt, _ := db.Prepare("UPDATE articles SET title = ?, content = ?, tags = ? WHERE id = ?")
-  _, err := stmt.Exec(title, content, tags, id)
+  stmt, preErr := db.Prepare("UPDATE articles SET title = ?, source = ?, tags = ?, html = ? WHERE id = ?")
+
+  if preErr != nil {
+    return preErr
+  }
+
+  _, err := stmt.Exec(title, source, tags, html, id)
+
   return err
 }
 
 // 添加文章
-func AddArticle(title, content, tags string) (int64, error) {
+func AddArticle(title, source, html, tags string) (int64, error) {
   db, _ := Open()
   defer db.Close()
 
-  stmt, preErr := db.Prepare("INSERT articles SET title=?, content=?, tags=?")
+  stmt, preErr := db.Prepare("INSERT articles SET title=?, source=?, html=?, tags=?")
 
   if preErr != nil {
     return 0, preErr
   }
 
-  res, execErr := stmt.Exec(title, html.EscapeString(content), tags)
+  res, execErr := stmt.Exec(title, source, html, tags)
 
   if execErr != nil {
     return 0, execErr

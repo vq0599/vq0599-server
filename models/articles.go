@@ -9,10 +9,11 @@ import (
 type Article struct {
   Id            int      `json:"id"`
   Title         string   `json:"title"`
-  Source       string   ` json:"source"`
+  Source        string   ` json:"source"`
   Create_time   int64    `json:"create_time"`
   Pv            int      `json:"pv"`
   Tags          []string `json:"tags"`
+  Summary       string   `json:"summary"`
   Html          string   `json:"html"`
 }
 
@@ -32,6 +33,8 @@ func GetArticles() ([]Article, error) {
     var create_time time.Time
     rows.Scan(&article.Id, &article.Title, &article.Source, &create_time, &article.Pv, &tags, &article.Html)
     
+    text := common.HtmlToPureText(article.Html)
+    article.Summary = common.SubString(text, 0, 100)
     article.Tags = common.Split(tags, ",")
     article.Create_time = create_time.UnixNano() / 1e6
 

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
   "bytes"
   "strings"
+  "regexp"
 )
 
 func NewRequestForward(c *gin.Context, url string) (*http.Response, error) {
@@ -26,3 +27,11 @@ func Split(str, sep string) []string {
   }
 }
 
+func HtmlToPureText (html string) string {
+  reHTML, _ := regexp.Compile("<[^>]*>")
+  return reHTML.ReplaceAllString(html, "")
+}
+
+func SubString (src string, start, end int) string {
+  return string([]rune(src)[start: end])
+}

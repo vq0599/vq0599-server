@@ -27,11 +27,22 @@ func Split(str, sep string) []string {
   }
 }
 
-func HtmlToPureText (html string) string {
+func HtmlToPureText(html string) string {
   reHTML, _ := regexp.Compile("<[^>]*>")
   return reHTML.ReplaceAllString(html, "")
 }
 
+func Min(x, y int) int {
+  if x < y {
+      return x
+  }
+  return y
+}
+
+// 截取文本 支持中文
 func SubString (src string, start, end int) string {
-  return string([]rune(src)[start: end])
+  runSrc := []rune(src)
+  maxLen := len(runSrc)
+  validEnd := Min(maxLen, end)
+  return string(runSrc[start: validEnd])
 }

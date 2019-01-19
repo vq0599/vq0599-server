@@ -32,9 +32,9 @@ func GetArticles() ([]Article, error) {
     var article Article
     var create_time time.Time
     rows.Scan(&article.Id, &article.Title, &article.Source, &create_time, &article.Pv, &tags, &article.Html)
-    
-    text := common.HtmlToPureText(article.Html)
-    article.Summary = common.SubString(text, 0, 100)
+
+    summaryHtml := common.Split(article.Html, "<!-- more -->")[0]
+    article.Summary = common.HtmlToPureText(summaryHtml)
     article.Tags = common.Split(tags, ",")
     article.Create_time = create_time.UnixNano() / 1e6
 

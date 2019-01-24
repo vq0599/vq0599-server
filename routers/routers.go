@@ -13,6 +13,9 @@ func InitRouter() *gin.Engine {
   apiv1.GET("/articles", controller.GetArticles)
   apiv1.GET("/articles/:id", controller.GetArticle)
 
+  apiv1.GET("/pv/:id", controller.UpdatePvs)
+  apiv1.POST("/like/:id", controller.UpdateLikes)
+
   apiv1.POST("/login", controller.Login)
   apiv1.GET("/login", controller.GetLoginStatus)
 

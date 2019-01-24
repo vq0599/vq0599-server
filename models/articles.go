@@ -15,27 +15,27 @@ type Article struct {
   Tags          []string `json:"tags"`
   Summary       string   `json:"summary"`
   Html          string   `json:"html"`
+  Like          int      `json:"like"`
 }
 
 // 获取文章列表
 func GetArticles() ([]Article, error) {
   var results []Article
-  var tags string
 
   db, _ := Open()
   defer db.Close()
-  
-  rows, err := db.Query("SELECT * FROM articles")
+
+  rows, err := db.Query("SELECT id, title, create_time, html, pv, `like` FROM articles")
   defer rows.Close()
 
   for rows.Next() {
     var article Article
+    var html string
     var create_time time.Time
-    rows.Scan(&article.Id, &article.Title, &article.Source, &create_time, &article.Pv, &tags, &article.Html)
+    rows.Scan(&article.Id, &article.Title, &create_time, &html, &article.Pv, &article.Like)
 
-    summaryHtml := common.Split(article.Html, "<!-- more -->")[0]
+    summaryHtml := common.Split(html, "<!-- more -->")[0]
     article.Summary = common.HtmlToPureText(summaryHtml)
-    article.Tags = common.Split(tags, ",")
     article.Create_time = create_time.UnixNano() / 1e6
 
     results = append(results, article)
@@ -49,6 +49,7 @@ func GetArticle(id int) (Article, error) {
   var article Article
   var create_time time.Time
   var tags string
+  var noop string
 
   db, _ := Open()
   defer db.Close()
@@ -56,11 +57,12 @@ func GetArticle(id int) (Article, error) {
   err := db.QueryRow("SELECT * FROM articles WHERE id = ?", id).Scan(
     &article.Id,
     &article.Title,
-    &article.Source,
+    &noop,
     &create_time,
     &article.Pv,
     &tags,
     &article.Html,
+    &article.Like,
   )
 
   article.Tags = common.Split(tags, ",")

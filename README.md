@@ -6,6 +6,6 @@
   - setCookie，有效期7天
   - TOKEN入库
 
-- 鉴权 => 判断TOKEN创建时间
+- 鉴权 => 判断TOKEN创建时间
   - 创建时间 < 1小时 => Next
-  - 创建时间 > 1小时 => TOKEN VS 数据库 & 更新TOKEN
+  - 创建时间 > 1小时 => TOKEN VS 数据库 & 更新TOKEN

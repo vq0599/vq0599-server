@@ -9,64 +9,77 @@ import (
 type Article struct {
   Id            int      `json:"id"`
   Title         string   `json:"title"`
-  Source        string   ` json:"source"`
   Create_time   int64    `json:"create_time"`
-  Pv            int      `json:"pv"`
   Tags          []string `json:"tags"`
-  Summary       string   `json:"summary"`
-  Html          string   `json:"html"`
-  Like          int      `json:"like"`
+  Summary       string   `json:"summary,omitempty"`
+  Source        string   `json:"source,omitempty"`
+  Html          string   `json:"html,omitempty"`
+  Read          int      `json:"read_number"`
+  Like          int      `json:"like_number"`
 }
 
 // 获取文章列表
-func GetArticles() ([]Article, error) {
+func GetArticles(admin bool) ([]Article, error) {
   var results []Article
+  var html string
+  var tags string
+  var create_time time.Time
 
   db, _ := Open()
   defer db.Close()
 
-  rows, err := db.Query("SELECT id, title, create_time, html, pv, `like` FROM articles")
+  rows, err := db.Query("SELECT id, title, create_time, html, tags, read_number, like_number FROM articles")
   defer rows.Close()
 
-  for rows.Next() {
-    var article Article
-    var html string
-    var create_time time.Time
-    rows.Scan(&article.Id, &article.Title, &create_time, &html, &article.Pv, &article.Like)
+  if err == nil {
+    for rows.Next() {
+      var article Article
+      rows.Scan(&article.Id, &article.Title, &create_time, &html, &tags, &article.Read, &article.Like)
 
-    summaryHtml := common.Split(html, "<!-- more -->")[0]
-    article.Summary = common.HtmlToPureText(summaryHtml)
-    article.Create_time = create_time.UnixNano() / 1e6
-
-    results = append(results, article)
+      if admin == false {
+        summaryHtml := common.Split(html, "<!-- more -->")[0]
+        article.Summary = common.HtmlToPureText(summaryHtml)
+      }
+      article.Tags = common.Split(tags, ",")
+      article.Create_time = create_time.UnixNano() / 1e6
+  
+      results = append(results, article)
+    }
   }
 
   return results, err
 }
 
 // 获取单篇文章
-func GetArticle(id int) (Article, error) {
+func GetArticle(id int, admin bool) (Article, error) {
   var article Article
   var create_time time.Time
   var tags string
-  var noop string
+  var source string
+  var err error
 
   db, _ := Open()
   defer db.Close()
 
-  err := db.QueryRow("SELECT * FROM articles WHERE id = ?", id).Scan(
+  err = db.QueryRow("SELECT id, title, create_time, tags, source, html, read_number, like_number FROM articles WHERE id = ?", id).Scan(
     &article.Id,
     &article.Title,
-    &noop,
     &create_time,
-    &article.Pv,
     &tags,
+    &source,
     &article.Html,
+    &article.Read,
     &article.Like,
   )
 
-  article.Tags = common.Split(tags, ",")
-  article.Create_time = create_time.UnixNano() / 1e6
+  if err == nil {
+    article.Tags = common.Split(tags, ",")
+    article.Create_time = create_time.UnixNano() / 1e6
+
+    if admin == true {
+      article.Source = source
+    }
+  }
 
   return article, err
 }

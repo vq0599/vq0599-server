@@ -17,31 +17,35 @@ type ArticleParams struct {
   Html string `json:"html" binding:"required"`
 }
 
-
-func GetArticles(c *gin.Context) {
-  cG := common.Gin{C: c}
-  results, err := models.GetArticles()
-  if (err != nil) {
-    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
-  } else {
-    cG.Response(http.StatusOK, common.SUCCESS, results)
+func GetArticles(admin bool) func(*gin.Context) {
+  return func(c *gin.Context) {
+    cG := common.Gin{C: c}
+    results, err := models.GetArticles(admin)
+    if (err != nil) {
+      cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
+    } else {
+      cG.Response(http.StatusOK, common.SUCCESS, results)
+    }
   }
 }
 
-func GetArticle(c *gin.Context) {
-  cG := common.Gin{C: c}
-  id, idErr := cG.GetParamFromURI("id")
+func GetArticle(admin bool) func(*gin.Context) {
 
-  if idErr != nil {
-    return
-  }
+  return func(c *gin.Context) {
+    cG := common.Gin{C: c}
+    id, idErr := cG.GetParamFromURI("id")
 
-  result, err := models.GetArticle(id)
+    if idErr != nil {
+      return
+    }
 
-  if (err != nil) {
-    cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
-  } else {
-    cG.Response(http.StatusOK, common.SUCCESS, result)
+    result, err := models.GetArticle(id, admin)
+    
+    if (err != nil) {
+      cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
+    } else {
+      cG.Response(http.StatusOK, common.SUCCESS, result)
+    }
   }
 }
 

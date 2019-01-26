@@ -8,24 +8,29 @@ import (
 
 func InitRouter() *gin.Engine {
   router := gin.Default()
-  apiv1 := router.Group("/api/v1")
+  api := router.Group("/api/v1")
+  apiAdmin := api.Group("/admin")
 
-  apiv1.GET("/articles", controller.GetArticles)
-  apiv1.GET("/articles/:id", controller.GetArticle)
+  api.GET("/articles", controller.GetArticles(false))
+  api.GET("/articles/:id", controller.GetArticle(false))
 
-  apiv1.GET("/pv/:id", controller.UpdatePvs)
-  apiv1.POST("/like/:id", controller.UpdateLikes)
+  api.GET("/pv/:id", controller.UpdatePvs)
+  api.POST("/like/:id", controller.UpdateLikes)
 
-  apiv1.POST("/login", controller.Login)
-  apiv1.GET("/login", controller.GetLoginStatus)
+  // ----------- 管理后台接口 -----------
+  apiAdmin.POST("/login", controller.Login)
+  apiAdmin.GET("/login", controller.GetLoginStatus)
 
-  apiv1.Use(middleware.Jwt())
+  api.Use(middleware.Jwt())
   {
-    apiv1.POST("/articles", controller.AddArticle)
-    apiv1.DELETE("/articles/:id",  controller.DeleteArticle)
-    apiv1.PATCH("/articles/:id", controller.UpdateArticle)
-    apiv1.POST("/upload/images", controller.UploadImage)
-    apiv1.POST("/upload/videos", controller.UploadVideo)
+
+    apiAdmin.GET("/articles", controller.GetArticles(true))
+    apiAdmin.GET("/articles/:id", controller.GetArticle(true))
+    apiAdmin.POST("/articles", controller.AddArticle)
+    apiAdmin.DELETE("/articles/:id", controller.DeleteArticle)
+    apiAdmin.PATCH("/articles/:id", controller.UpdateArticle)
+    apiAdmin.POST("/upload/images", controller.UploadImage)
+    apiAdmin.POST("/upload/videos", controller.UploadVideo)
   }
 
   return router

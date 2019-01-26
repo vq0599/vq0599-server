@@ -2,11 +2,13 @@ package common
 
 import (
   "net/http"
+  "net/url"
   "io/ioutil"
-	"github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin"
   "bytes"
   "strings"
   "regexp"
+  "vq0599/conf"
 )
 
 func NewRequestForward(c *gin.Context, url string) (*http.Response, error) {
@@ -40,9 +42,22 @@ func Min(x, y int) int {
 }
 
 // 截取文本 支持中文
-func SubString (src string, start, end int) string {
+func SubString(src string, start, end int) string {
   runSrc := []rune(src)
   maxLen := len(runSrc)
   validEnd := Min(maxLen, end)
   return string(runSrc[start: validEnd])
+}
+
+// 设置Cookie
+func SetCookie(c *gin.Context, name, value string) {
+  http.SetCookie(c.Writer, &http.Cookie{
+    Name:     name,
+    Value:    url.QueryEscape(value),
+    MaxAge:   conf.COOKIES_MAXAGE,
+    Path:     "/",
+    Domain:   conf.COOKIES_DOMAIN,
+    Secure:   false,
+    HttpOnly: true,
+  })
 }

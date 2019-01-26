@@ -5,25 +5,21 @@ import (
   "time"
   "vq0599/conf"
   "strconv"
+  // "fmt"
 )
 
 var jwtSecret = []byte(conf.JWT_SECRET)
 
-type Claims struct {
-  Id string `json:"id"`
-  jwt.StandardClaims
-}
-
 func GenerateToken(id int) (string, error) {
-  expireTime := time.Now().Add(conf.JWT_MAXAGE)
+  createTime := time.Now()
+  expireTime := createTime.Add(conf.JWT_MAXAGE)
   idString := strconv.Itoa(id)
 
-  claims := Claims{
-    idString,
-    jwt.StandardClaims{
-      ExpiresAt: expireTime.Unix(),
-      Issuer:    "vq0599",
-    },
+  claims := &jwt.StandardClaims{
+    Id: idString,
+    ExpiresAt: expireTime.Unix(),
+    Issuer: conf.JWT_ISSUER,
+    IssuedAt: createTime.Unix(),
   }
 
   tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -32,16 +28,16 @@ func GenerateToken(id int) (string, error) {
   return token, err
 }
 
-func ParseToken(token string) (*Claims, error) {
-  tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(tokenString string) (*jwt.StandardClaims, bool) {
+  token, _ := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
     return jwtSecret, nil
   })
 
-  if tokenClaims != nil {
-    if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-      return claims, nil
-    }
+  claims, ok := token.Claims.(*jwt.StandardClaims);
+
+  if ok && token.Valid {
+    return claims, true
   }
 
-  return nil, err
+  return nil, false
 }

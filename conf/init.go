@@ -13,6 +13,7 @@ const (
 
   SERVER_PORT     = "8180"
 
+  JWT_ISSUER      = "vq0599"
   JWT_SECRET      = "golang"
   // 24 小时有效期
   JWT_MAXAGE      = 24 * time.Hour

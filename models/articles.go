@@ -3,6 +3,7 @@ package models
 import (
   "time"
   "vq0599/common"
+  "sort"
   // "fmt"
 )
 
@@ -18,9 +19,20 @@ type Article struct {
   Like          int      `json:"like_number"`
 }
 
+type Articles []Article
+
+// 排序三部曲，略麻烦
+func (a Articles) Len() int { return len(a) }
+
+func (a Articles) Less(i, j int) bool {
+  return a[i].Create_time > a[j].Create_time
+}
+
+func (a Articles) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+
 // 获取文章列表
-func GetArticles(admin bool) ([]Article, error) {
-  var results []Article
+func GetArticles(admin bool) (Articles, error) {
+  var results Articles
   var html string
   var tags string
   var create_time time.Time
@@ -47,6 +59,7 @@ func GetArticles(admin bool) ([]Article, error) {
     }
   }
 
+  sort.Sort(results)
   return results, err
 }
 

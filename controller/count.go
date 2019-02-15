@@ -4,18 +4,15 @@ import (
   "net/http"
   "github.com/gin-gonic/gin"
   // "fmt"
-  // _"github.com/go-sql-driver/mysql"
   "vq0599/models"
   "vq0599/common"
-  // "strings"
-  "strconv"
 )
 
 func UpdatePvs(c *gin.Context) {
-  idString := c.Param("id")
-  id, err := strconv.Atoi(idString)
+  cG := common.Gin{C: c}
+  id, idErr := cG.GetParamFromURI("id")
 
-  if err != nil {
+  if idErr != nil {
     return
   }
 

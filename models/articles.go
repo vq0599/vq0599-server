@@ -3,8 +3,8 @@ package models
 import (
   "time"
   "vq0599/common"
-  "sort"
-  // "fmt"
+  "fmt"
+  "math"
 )
 
 type Article struct {
@@ -21,29 +21,39 @@ type Article struct {
 
 type Articles []Article
 
-// 排序三部曲，略麻烦
-func (a Articles) Len() int { return len(a) }
-
-func (a Articles) Less(i, j int) bool {
-  return a[i].Create_time > a[j].Create_time
+type Pagination struct {
+  Page        int `json:"page" binding:"required"`
+  PageSize    int `json:"page_size" binding:"required"`
+  PageTotal   int `json:"page_total" binding:"required"`
+  Total       int `json:"total" binding:"required"`
 }
 
-func (a Articles) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+type ArticlesResult struct {
+  Pagination
+  Data        Articles `json:"data" binding:"required"`
+}
 
 // 获取文章列表
-func GetArticles(admin bool) (Articles, error) {
-  var results Articles
-  var html string
-  var tags string
-  var create_time time.Time
+func GetArticles(admin bool, page, pageSize int) (ArticlesResult, error) {
+  var result ArticlesResult
+  var articles Articles
+  var total int
 
   db, _ := Open()
   defer db.Close()
 
-  rows, err := db.Query("SELECT id, title, create_time, html, tags, read_number, like_number FROM articles")
+  fields := "id, title, create_time, html, tags, read_number, like_number"
+  rows, err := db.Query(fmt.Sprintf( "SELECT %s FROM articles ORDER BY create_time DESC limit %d , %d", fields, (page - 1) * pageSize, pageSize))
+
+  db.QueryRow("SELECT COUNT(*) FROM articles").Scan(&total)
+
   defer rows.Close()
 
   if err == nil {
+    var html string
+    var tags string
+    var create_time time.Time
+
     for rows.Next() {
       var article Article
       rows.Scan(&article.Id, &article.Title, &create_time, &html, &tags, &article.Read, &article.Like)
@@ -55,12 +65,17 @@ func GetArticles(admin bool) (Articles, error) {
       article.Tags = common.Split(tags, ",")
       article.Create_time = create_time.UnixNano() / 1e6
   
-      results = append(results, article)
+      articles = append(articles, article)
     }
   }
 
-  sort.Sort(results)
-  return results, err
+  result.Total = total
+  result.Page = page
+  result.PageSize = pageSize
+  result.PageTotal = int(math.Ceil(float64(total) / float64(pageSize)))
+  result.Data = articles
+
+  return result, err
 }
 
 // 获取单篇文章

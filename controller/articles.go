@@ -20,7 +20,14 @@ type ArticleParams struct {
 func GetArticles(admin bool) func(*gin.Context) {
   return func(c *gin.Context) {
     cG := common.Gin{C: c}
-    results, err := models.GetArticles(admin)
+    page, pageErr := cG.GetPage()
+    pageSize, pageSizeErr := cG.GetPageSize()
+
+    if pageErr != nil || pageSizeErr != nil {
+      return
+    }
+
+    results, err := models.GetArticles(admin, page, pageSize)
     if (err != nil) {
       cG.Response(http.StatusOK, common.ERROR_NOT_EXIST_ARTICLE, nil)
     } else {

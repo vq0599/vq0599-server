@@ -20,10 +20,10 @@ const (
   // 1小时刷新TOKEN
   JWT_REFRESH     = 1 * time.Hour
 
-  COOKIES_DOMAIN  = "vq0599.site"
+  COOKIES_DOMAIN  = "vq0599.com"
   COOKIES_MAXAGE  = 7 * 24 * 3600
 
-  STATIC_DOMAIN   = "http://static.vq0599.site"
+  STATIC_DOMAIN   = "https://static.vq0599.com"
 
   DEFAULT_PER_SIZE = 10
 )

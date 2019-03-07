@@ -2,44 +2,45 @@ package controller
 
 import (
   "net/http"
-  "io/ioutil"
+  "net/url"
+  "path"
   "github.com/gin-gonic/gin"
   // "fmt"
   "vq0599/conf"
-  "strings"
   "vq0599/common"
-  "encoding/json"
+  "github.com/tencentyun/cos-go-sdk-v5"
+  "github.com/teris-io/shortid"
 )
 
+func UploadImage(c *gin.Context) {
+  cG := common.Gin{C: c}
+  file, header, ParamErr := c.Request.FormFile("file")
 
-type StaticServerResponse struct {
-  Code  string `json:"code"`
-  Data  string `json:"data"`
-  Msg   string `json:"msg"`
-}
+  if ParamErr != nil {
+    cG.ResponseParamError()
+    return
+  }
 
-func requestStaticServer(c *gin.Context, path string) {
-  url := conf.STATIC_DOMAIN + path
+  bucketUrl, _ := url.Parse(conf.COS_API_DOMAIN)
+  client := cos.NewClient(&cos.BaseURL{BucketURL: bucketUrl}, &http.Client{
+    Transport: &cos.AuthorizationTransport{
+      SecretID:  conf.COS_SECRET_ID,
+      SecretKey: conf.COS_SECRET_KEY,
+    },
+  })
 
-  resp, _ := common.NewRequestForward(c, url)
-  defer resp.Body.Close()
+  sid, _ := shortid.New(conf.SHORT_WORKER, shortid.DefaultABC, conf.SHORT_SEED)
+  key, _ := sid.Generate()
+  suffix := path.Ext(header.Filename)
+  filePath := "images/"+ key + suffix
 
-  respData := &StaticServerResponse{}
-  respBodyByte, _ := ioutil.ReadAll(resp.Body)
-  json.NewDecoder(strings.NewReader(string(respBodyByte))).Decode(respData)
+  resp, err := client.Object.Put(c, filePath, file, nil)
 
-  if resp.StatusCode >= 500 {
-    c.JSON(resp.StatusCode, http.StatusText(resp.StatusCode))
+  if err != nil {
+    cG.Response(http.StatusInternalServerError, common.ERROR, nil)
+  } else if resp.StatusCode != http.StatusOK {
+    cG.Response(resp.StatusCode, common.ERROR, nil)
   } else {
-    c.JSON(resp.StatusCode, respData)
+    cG.Response(http.StatusOK, common.SUCCESS, conf.COS_STATIC_DOMAIN + "/" + filePath)
   }
 }
-
-func UploadImage(c *gin.Context) {
-  requestStaticServer(c, "/upload/image")
-}
-
-func UploadVideo(c *gin.Context) {
-  requestStaticServer(c, "/upload/video")
-}
-

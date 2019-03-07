@@ -23,14 +23,12 @@ func InitRouter() *gin.Engine {
 
   api.Use(middleware.Jwt())
   {
-
     apiAdmin.GET("/articles", controller.GetArticles(true))
     apiAdmin.GET("/articles/:id", controller.GetArticle(true))
     apiAdmin.POST("/articles", controller.AddArticle)
     apiAdmin.DELETE("/articles/:id", controller.DeleteArticle)
     apiAdmin.PATCH("/articles/:id", controller.UpdateArticle)
-    apiAdmin.POST("/upload/images", controller.UploadImage)
-    apiAdmin.POST("/upload/videos", controller.UploadVideo)
+    apiAdmin.POST("/upload/image", controller.UploadImage)
   }
 
   return router

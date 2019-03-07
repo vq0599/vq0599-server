@@ -1,27 +1,17 @@
 package common
 
 import (
-  "net/http"
-  "github.com/gin-gonic/gin"
   "strconv"
   "errors"
   // "fmt"
   "vq0599/conf"
 )
 
-func (g *Gin) responseParamError() {
-  g.C.JSON(http.StatusBadRequest, gin.H{
-    "code": ERROR_INVALID_PARAMS,
-    "msg": GetMsg(ERROR_INVALID_PARAMS),
-    "data": nil,
-  })
-}
-
 func (g *Gin) ScanRequestBody(params interface{}) error {
   paramsErr := g.C.ShouldBindJSON(params)
 
   if (paramsErr != nil) {
-    g.responseParamError()
+    g.ResponseParamError()
   }
   return paramsErr
 }
@@ -31,7 +21,7 @@ func (g *Gin) GetParamFromURI(key string) (int, error) {
   id, err := strconv.Atoi(idString)
 
   if (err != nil) {
-    g.responseParamError()
+    g.ResponseParamError()
     return 0, err
   }
 
@@ -51,7 +41,7 @@ func (g *Gin) GetNumberQuery(key string, defaultValue int) int {
 func (g *Gin) GetPage() (int, error) {
   page := g.GetNumberQuery("page", 1)
   if page < 0 {
-    g.responseParamError()
+    g.ResponseParamError()
     return 0, errors.New("ERROR_INVALID_PARAMS")
   }
 
@@ -61,7 +51,7 @@ func (g *Gin) GetPage() (int, error) {
 func (g *Gin) GetPageSize() (int, error) {
   pageSize := g.GetNumberQuery("page_size", conf.DEFAULT_PER_SIZE)
   if pageSize < 0 {
-    g.responseParamError()
+    g.ResponseParamError()
     return 0, errors.New("ERROR_INVALID_PARAMS")
   }
 

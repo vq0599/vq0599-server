@@ -11,18 +11,6 @@ import (
   "vq0599/conf"
 )
 
-// func setCookie(c *gin.Context, name, value string) {
-//   http.SetCookie(c.Writer, &http.Cookie{
-//     Name:     name,
-//     Value:    url.QueryEscape(value),
-//     MaxAge:   conf.COOKIES_MAXAGE,
-//     Path:     "/",
-//     Domain:   conf.COOKIES_DOMAIN,
-//     Secure:   false,
-//     HttpOnly: true,
-//   })
-// }
-
 // 任何更新资源的操作之前，完整的走一遍Token流程
 func VerifyTokenWithRefresh(c *gin.Context) (bool, string) {
   cookie, cookieErr := c.Request.Cookie("Token")
@@ -86,7 +74,7 @@ func Login(c *gin.Context) {
   if loginStatus == true {
     token, _ := util.GenerateToken(id)
     models.UpdateToken(token, id)
-    common.SetCookie(c, "Token", token)
+    util.SetCookie(c, "Token", token)
     cG.Response(http.StatusOK, common.SUCCESS, nil)
   } else {
     cG.Response(http.StatusOK, common.ERROR_PASSWORD_FAIL, nil)
@@ -99,7 +87,7 @@ func GetLoginStatus(c *gin.Context) {
 
   if isValid == true {
     if token != "" {
-      common.SetCookie(c, "Token", token)
+      util.SetCookie(c, "Token", token)
     }
     cG.Response(http.StatusOK, common.SUCCESS, nil)
   } else {

@@ -1,4 +1,4 @@
-package common
+package util
 
 import (
   "net/http"
@@ -11,6 +11,7 @@ import (
   "vq0599/conf"
 )
 
+// 转发请求
 func NewRequestForward(c *gin.Context, url string) (*http.Response, error) {
   requestBody, _ := ioutil.ReadAll(c.Request.Body)
 

@@ -2,7 +2,7 @@ package models
 
 import (
   "time"
-  "vq0599/common"
+  "vq0599/util"
   "fmt"
   "math"
 )
@@ -59,10 +59,10 @@ func GetArticles(admin bool, page, pageSize int) (ArticlesResult, error) {
       rows.Scan(&article.Id, &article.Title, &create_time, &html, &tags, &article.Read, &article.Like)
 
       if admin == false {
-        summaryHtml := common.Split(html, "<!-- more -->")[0]
-        article.Summary = common.HtmlToPureText(summaryHtml)
+        summaryHtml := util.Split(html, "<!-- more -->")[0]
+        article.Summary = util.HtmlToPureText(summaryHtml)
       }
-      article.Tags = common.Split(tags, ",")
+      article.Tags = util.Split(tags, ",")
       article.Create_time = create_time.UnixNano() / 1e6
   
       articles = append(articles, article)
@@ -101,7 +101,7 @@ func GetArticle(id int, admin bool) (Article, error) {
   )
 
   if err == nil {
-    article.Tags = common.Split(tags, ",")
+    article.Tags = util.Split(tags, ",")
     article.Create_time = create_time.UnixNano() / 1e6
 
     if admin == true {

@@ -20,7 +20,9 @@ func Jwt() gin.HandlerFunc {
       return
     }
 
-    util.SetCookie(c, "Token", token)
+    if token != "" {
+      util.SetCookie(c, "Token", token)
+    }
     c.Next()
   }
 }

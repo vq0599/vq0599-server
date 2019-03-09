@@ -35,13 +35,7 @@ func VerifyTokenWithRefresh(c *gin.Context) (bool, string) {
   }
 
   id, _ := strconv.Atoi(claims.Id)
-
-  if models.VerifyToken(id, token) == false {
-    return true, ""
-  }
-
   newToken, _ := util.GenerateToken(id)
-  models.UpdateToken(newToken, id)
 
   return true, newToken
 }
@@ -73,7 +67,6 @@ func Login(c *gin.Context) {
 
   if loginStatus == true {
     token, _ := util.GenerateToken(id)
-    models.UpdateToken(token, id)
     util.SetCookie(c, "Token", token)
     cG.Response(http.StatusOK, common.SUCCESS, nil)
   } else {

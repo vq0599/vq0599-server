@@ -29,9 +29,13 @@ func GenerateToken(id int) (string, error) {
 }
 
 func ParseToken(tokenString string) (*jwt.StandardClaims, bool) {
-  token, _ := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+  token, parseErr := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
     return jwtSecret, nil
   })
+
+  if parseErr != nil {
+    return nil, false
+  }
 
   claims, ok := token.Claims.(*jwt.StandardClaims);
 

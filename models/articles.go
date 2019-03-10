@@ -43,7 +43,7 @@ func GetArticles(admin bool, page, pageSize int) (ArticlesResult, error) {
   defer db.Close()
 
   fields := "id, title, create_time, html, tags, read_number, like_number"
-  rows, err := db.Query(fmt.Sprintf( "SELECT %s FROM articles ORDER BY create_time DESC limit %d , %d", fields, (page - 1) * pageSize, pageSize))
+  rows, err := db.Query(fmt.Sprintf("SELECT %s FROM articles WHERE visible = 1 ORDER BY create_time DESC limit %d , %d", fields, (page - 1) * pageSize, pageSize))
 
   db.QueryRow("SELECT COUNT(*) FROM articles").Scan(&total)
 
